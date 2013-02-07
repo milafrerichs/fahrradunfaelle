@@ -33,7 +33,7 @@
       return Bundesland;
 
     })();
-    return d3.json("/fahrrad/data/fahrradunfalle_deutschland.json", function(data) {
+    return d3.json("/fahrradunfaelle/data/fahrradunfalle_deutschland.json", function(data) {
       var deutschland, domain_range, quantize;
       deutschland = new Land();
       domain_range = [];
