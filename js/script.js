@@ -1,7 +1,13 @@
 (function() {
+  var DataTypes;
+
+  DataTypes = {
+    pro_tausend: 1,
+    pro_tausend_gewichtet: 2
+  };
 
   $(function() {
-    var Bundesland, Land;
+    var Bundesland, DataViz, Land, d;
     Land = (function() {
 
       function Land() {
@@ -19,42 +25,94 @@
         this.einwohner = 0;
         this.dichte = 0;
         this.verletzte = 0;
-        this.pro_tausend = 0;
+        this.verletzte_pro_tausend = 0;
+        this.verletzte_pro_tausend_gewichtet = 0;
       }
 
-      Bundesland.prototype.verletzte_pro_tausend = function() {
-        return this.pro_tausend = (100000 * this.verletzte) / this.einwohner;
-      };
-
-      Bundesland.prototype.verletzte_text = function() {
-        return d3.round(this.pro_tausend) + " Verletze pro 100.000 Einwohner";
+      Bundesland.prototype.verletzte_text = function(type) {
+        var millions, text;
+        if (type == null) {
+          type = DataTypes.pro_tausend;
+        }
+        millions = d3.format(",n");
+        text = (function() {
+          switch (type) {
+            case DataTypes.pro_tausend:
+              return d3.round(this.verletzte_pro_tausend) + (" Verletze pro 100.000 Einwohner. <br/>(Absolut: " + this.verletzte + ", Einwohner: " + (millions(this.einwohner)) + ")");
+            case DataTypes.pro_tausend_gewichtet:
+              return " Faktor " + (d3.round(this.verletzte_pro_tausend_gewichtet)) + ". <br/>Gewichtet nach Einwohnerdichte.<br/>(Absolut: " + this.verletzte + ", Dichte: " + (d3.round(this.dichte)) + ")";
+          }
+        }).call(this);
+        return text;
       };
 
       return Bundesland;
 
     })();
-    return d3.json("/fahrradunfaelle/data/fahrradunfalle_deutschland.json", function(data) {
-      var deutschland, domain_range, quantize;
-      deutschland = new Land();
-      domain_range = [];
-      data.forEach(function(bundesland) {
-        var land;
-        land = new Bundesland(bundesland.bundesland, deutschland);
-        land.einwohner = bundesland.einwohner;
-        land.verletzte = bundesland.verletze;
-        land.dichte = bundesland.dichte;
-        land.verletzte_pro_tausend();
-        domain_range.push(land.pro_tausend);
-        return deutschland.bundeslaender.push(land);
-      });
-      quantize = d3.scale.quantile().domain(domain_range).range(d3.range(9));
-      return deutschland.bundeslaender.forEach(function(bundesland) {
-        return d3.select('#' + bundesland.name).attr('class', function(d, i) {
-          return 'q' + quantize(bundesland.pro_tausend) + '-9';
-        }).append("svg:title").text(function(d) {
-          return bundesland.verletzte_text();
+    DataViz = (function() {
+
+      function DataViz() {
+        this.deutschland = new Land();
+        this.domain_range = [];
+        this.domain_range_gewichtet = [];
+      }
+
+      DataViz.prototype.getData = function() {
+        var _this = this;
+        return d3.json("/fahrrad/data/fahrradunfalle_deutschland.json", function(data) {
+          data.forEach(function(bundesland) {
+            var land;
+            land = new Bundesland(bundesland.name, _this.deutschland);
+            land.einwohner = bundesland.einwohner;
+            land.verletzte = bundesland.verletzte;
+            land.dichte = bundesland.dichte;
+            land.verletzte_pro_tausend = bundesland.verletzte_pro_tausend;
+            land.verletzte_pro_tausend_gewichtet = bundesland.verletzte_pro_tausend_gewichtet;
+            _this.domain_range.push(land.verletzte_pro_tausend);
+            _this.domain_range_gewichtet.push(land.verletzte_pro_tausend_gewichtet);
+            return _this.deutschland.bundeslaender.push(land);
+          });
+          _this.quantize = d3.scale.quantile().domain(_this.domain_range).range(d3.range(9));
+          _this.quantize_gewichtet = d3.scale.quantile().domain(_this.domain_range_gewichtet).range(d3.range(9));
+          return _this.display();
         });
-      });
+      };
+
+      DataViz.prototype.display = function(type) {
+        var _this = this;
+        if (type == null) {
+          type = DataTypes.pro_tausend;
+        }
+        return this.deutschland.bundeslaender.forEach(function(bundesland) {
+          d3.select('#' + bundesland.name).attr('class', function(d, i) {
+            switch (type) {
+              case DataTypes.pro_tausend:
+                return 'q' + _this.quantize(bundesland.verletzte_pro_tausend) + '-9';
+              case DataTypes.pro_tausend_gewichtet:
+                return 'q' + _this.quantize_gewichtet(bundesland.verletzte_pro_tausend_gewichtet) + '-9';
+            }
+          });
+          return $("#" + bundesland.name).popover({
+            placement: "right",
+            trigger: "hover",
+            title: bundesland.name,
+            html: true,
+            container: "body",
+            delay: {
+              show: 500,
+              hide: 100
+            }
+          }).attr('data-content', bundesland.verletzte_text(type));
+        });
+      };
+
+      return DataViz;
+
+    })();
+    d = new DataViz();
+    d.getData();
+    return d3.select("select").on("change", function() {
+      return d.display(parseInt(this.value));
     });
   });
 
