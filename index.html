@@ -2,15 +2,26 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    
+    <script src="js/bootstrap.min.js"></script>
     <script src="js/d3.v3.min.js"></script>
     <script src="js/script.js"></script>
     <link rel="stylesheet" href="css/screen.css" type="text/css" >
     <link rel="stylesheet" href="css/colorbrewer.css" type="text/css">
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <title>Fahrradunfälle in Deutschland - Verletzte 2011</title>
   </head>
   <body>
-    
-    <div id="map">
-                
+    <div class="container">
+      <div class="navbar">
+        <div class="navbar-inner">
+          <a class="brand" href="#">Fahrradunfälle in Deutschland - Verletzte 2011</a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="span-8">
+          <div id="map">
+              
           <svg version="1.1" id="Bundesrepublik_Deutschland"  width="591.504" height="800.504" class="Blues">
           <g id="bundeslaender" class="Blues">
           	<path id="Thüringen"  d="M312.004,351.725l1.845-0.401l3.39,0.274l1.912,0.169
@@ -912,7 +923,33 @@
           </g>
           </svg>
 
-    </div>
+        </div>
+        </div>
+        <div class="span-4">
+          <div class="row">
+          <form action="" method="post">
+            <select name="verletzte">
+              <option value="1">pro 100.000</option>
+              <option value="2">Gewichtet</option>
+            </select>
+          </form>  
+          </div>
+          <div class="row">
+            <h3>Berechnungen</h3>
+            <h4>Gewichtet:</h4>
+            <p>Verletzte je 100.000 Einwohner * Dichte des Bundeslandes / gemittelte Dichte</p> 
+            <p>Dichte = Einwohner je km<sup>2</sup>
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="span4">
+          <h4>Quellen:</h4>
+          <p>Einwohnerzahlen und Dichte: <a href="http://www.statistik-portal.de/Statistik-Portal/de_jb01_jahrtab1.asp">Statistische Ämter</a></p>
+          <p>Fahrradunfälle: <a href="https://fragdenstaat.de/anfrage/unfallstatistik-bezuglich-fahrradfahrer/">Frag den Staat</a> / <a href="https://fragdenstaat.de/files/foi/6775/Verkehrsbericht-2011.pdf">Destatis</a></p>
+          <p>Deutschlandkarte: <a href="http://en.wikipedia.org/wiki/File:Karte_Bundesrepublik_Deutschland.svg">Wikipedia</a></p>
+      </div>
   </body>
 
 </html>
