@@ -59,7 +59,7 @@
 
       DataViz.prototype.getData = function() {
         var _this = this;
-        return d3.json("/fahrrad/data/fahrradunfalle_deutschland.json", function(data) {
+        return d3.json("/fahrradunfaelle/data/fahrradunfalle_deutschland.json", function(data) {
           data.forEach(function(bundesland) {
             var land;
             land = new Bundesland(bundesland.name, _this.deutschland);
